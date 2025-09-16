@@ -16,13 +16,11 @@ from typing import (
 )
 
 import numpy as np
-
 import torch
+from packaging import version
 from torch import nn
 from torch.jit import ScriptModule
-from torch.return_types import mode
 from torch.utils.hooks import RemovableHandle
-from packaging import version
 
 from .enums import ColumnSettings, Mode, RowSettings, Verbosity
 from .formatting import FormattingOptions
@@ -497,7 +495,7 @@ def get_device(
         if model_parameter is not None and model_parameter.device:
             return model_parameter.device
             # Since torch.accelerator is available in torch 2.6.0 and above
-        if  version.parse(torch.__version__) >= version.parse("2.6.0"):
+        if version.parse(torch.__version__) >= version.parse("2.6.0"):
             try:
                 if torch.accelerator.is_available():
                     return torch.accelerator.current_accelerator()
@@ -505,6 +503,7 @@ def get_device(
                 print(f"Error occurred while getting device: {e}")
         try:
             import torch_directml
+
             print("DirectML plugin is installed, using DirectML device.")
             if model_parameter is not None:
                 return torch_directml.device(torch_directml.default_device())
