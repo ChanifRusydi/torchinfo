@@ -16,13 +16,11 @@ from typing import (
 )
 
 import numpy as np
-
 import torch
+from packaging import version
 from torch import nn
 from torch.jit import ScriptModule
-from torch.return_types import mode
 from torch.utils.hooks import RemovableHandle
-from packaging import version
 
 from .enums import ColumnSettings, Mode, RowSettings, Verbosity
 from .formatting import FormattingOptions
@@ -502,14 +500,15 @@ def get_device(
                 accelerator_module = getattr(torch, "accelerator", None)
                 if accelerator_module is not None:
                     if accelerator_module.is_available():
-                        return accelerator_module.current_accelerator() #type: ignore[no-any-return]
+                        return accelerator_module.current_accelerator()  # type: ignore[no-any-return]
             except Exception as e:
                 print(f"Error getting accelerator device: {e}")
         try:
-            import torch_directml #type: ignore[import-not-found]
+            import torch_directml  # type: ignore[import-not-found]
+
             print("Pytorch DirectML is installed, using DirectML device.")
             if model_parameter is not None:
-                return torch_directml.device(torch_directml.default_device()) #type: ignore[no-any-return]
+                return torch_directml.device(torch_directml.default_device())  # type: ignore[no-any-return]
         except ImportError:
             print("Pytorch DirectML is not installed.")
         return torch.device("cpu")
