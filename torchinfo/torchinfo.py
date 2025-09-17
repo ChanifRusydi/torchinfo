@@ -16,11 +16,13 @@ from typing import (
 )
 
 import numpy as np
+
 import torch
-from packaging import version
 from torch import nn
 from torch.jit import ScriptModule
+from torch.return_types import mode
 from torch.utils.hooks import RemovableHandle
+from packaging import version
 
 from .enums import ColumnSettings, Mode, RowSettings, Verbosity
 from .formatting import FormattingOptions
@@ -494,18 +496,20 @@ def get_device(
 
         if model_parameter is not None and model_parameter.device:
             return model_parameter.device
-            # Since torch.accelerator is available in torch 2.6.0 and above
+        # Since torch.accelerator is available in torch 2.6.0 and above
         if version.parse(torch.__version__) >= version.parse("2.6.0"):
             try:
-                if torch.accelerator.is_available():
-                    return torch.accelerator.current_accelerator()
+                accelerator_module = getattr(torch, "accelerator", None)
+                if accelerator_module is not None:
+                    if accelerator_module.is_available():
+                        return accelerator_module.current_accelerator() #type: ignore[no-any-return]
             except Exception as e:
-                print(f"Error occurred while getting device: {e}")
+                print(f"Error getting accelerator device: {e}")
         try:
-            import torch_directml #type: ignore
+            import torch_directml #type: ignore[import-not-found]
             print("Pytorch DirectML is installed, using DirectML device.")
             if model_parameter is not None:
-                return torch_directml.device(torch_directml.default_device())
+                return torch_directml.device(torch_directml.default_device()) #type: ignore[no-any-return]
         except ImportError:
             print("Pytorch DirectML is not installed.")
         return torch.device("cpu")
