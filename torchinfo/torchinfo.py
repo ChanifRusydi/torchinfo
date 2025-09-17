@@ -504,12 +504,12 @@ def get_device(
             except Exception as e:
                 print(f"Error occurred while getting device: {e}")
         try:
-            import torch_directml
-            print("DirectML plugin is installed, using DirectML device.")
+            import torch_directml #type: ignore
+            print("Pytorch DirectML is installed, using DirectML device.")
             if model_parameter is not None:
                 return torch_directml.device(torch_directml.default_device())
         except ImportError:
-            print("DirectML plugin is not installed.")
+            print("Pytorch DirectML is not installed.")
         return torch.device("cpu")
     return None
 
